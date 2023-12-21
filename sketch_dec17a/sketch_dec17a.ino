@@ -4,6 +4,8 @@
 
 float roll, pitch, yaw;
 
+float calibratedRoll, calibratedPitch, calibratedYaw;
+
 void getGyro(void) {
 
 
@@ -51,6 +53,22 @@ void setup() {
   Wire.write(0x6B);
   Wire.write(0x00);
   Wire.endTransmission();
+
+  // calibrate
+  // basically read out a large number of values when first starting and average them out
+  for (int i=0; i <2000; i++) {
+    getGyro();
+
+    calibratedRoll+=roll;
+    calibratedPitch+=pitch;
+    calibratedYaw+=yaw;
+    delay(1);
+  }
+
+    calibratedRoll/=2000;
+    calibratedPitch/=2000;
+    calibratedYaw/=2000;
+
 }
 
 bool blink = false;
@@ -62,14 +80,17 @@ void loop() {
 
   getGyro();
 
+  // adjust values with calibration values
+  roll-=calibratedRoll;
+  pitch-=calibratedPitch;
+  yaw-=calibratedYaw;
+
   Serial.print("Roll: ");
   Serial.print(roll);
   Serial.print("Pitch: ");
   Serial.print(pitch);
   Serial.print("Yaw: ");
   Serial.println(yaw);
-
-
 
 
   delay(50);
