@@ -69,6 +69,11 @@ void setup() {
     calibratedPitch/=2000;
     calibratedYaw/=2000;
 
+    analogWriteFrequency(1,250);   // pwm for motor on pin 1, 250Hz 
+    analogWriteResolution(12);  //  12 bit signal between 0 and 4095  ( default 8 bit would only give us 0 to 255)
+
+    // note to self: 0 = 0 micro secs, 4095 = 4000 microsecs .. so need to multiply with 4095/4000 = 1.0214 when setting PWM
+
 }
 
 bool blink = false;
@@ -91,6 +96,14 @@ void loop() {
   Serial.print(pitch);
   Serial.print("Yaw: ");
   Serial.println(yaw);
+
+  // hread receiver value here and write inputThrottle*1.024 to motor pwm pin
+  //   haven't bought a receiver yet :)
+
+  float throttle = 1000; // assume a value between 0 and 4000
+
+  // run motor at throttle speed
+  analogWrite(1, throttle * 1.024) ;
 
 
   delay(50);
