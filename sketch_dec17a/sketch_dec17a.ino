@@ -6,6 +6,11 @@ float roll, pitch, yaw;
 
 float calibratedRoll, calibratedPitch, calibratedYaw;
 
+const int ESC_MIN_SIGNAL = 1000;  // Minimum throttle signal (in microseconds)
+const int ESC_MAX_SIGNAL = 2000;  // Maximum throttle signal (in microseconds)
+const int ESC_ARM_SIGNAL = 1500;  // Mid-point signal, often used for arming
+
+
 void getGyro(void) {
 
 
@@ -73,6 +78,18 @@ void setup() {
     analogWriteResolution(12);  //  12 bit signal between 0 and 4095  ( default 8 bit would only give us 0 to 255)
 
     // note to self: 0 = 0 micro secs, 4095 = 4000 microsecs .. so need to multiply with 4095/4000 = 1.0214 when setting PWM
+
+    // Send max signal to start calibration
+  analogWrite(1, ESC_MAX_SIGNAL);
+  delay(2000);  // Wait for 2 seconds
+
+  // Send min signal to complete calibration
+  analogWrite(1, ESC_MIN_SIGNAL);
+  delay(2000);  // Wait for 2 seconds
+
+  // Optionally, send a neutral (arming) signal
+  analogWrite(1, ESC_ARM_SIGNAL);
+  delay(1000);  // Wait for 1 second
 
 }
 
