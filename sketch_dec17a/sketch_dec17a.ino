@@ -1,5 +1,6 @@
 
 #include <Wire.h>
+#include <PulsePosition.h>
 
 
 float roll, pitch, yaw;
@@ -9,6 +10,23 @@ float calibratedRoll, calibratedPitch, calibratedYaw;
 const int ESC_MIN_SIGNAL = 1000;  // Minimum throttle signal (in microseconds)
 const int ESC_MAX_SIGNAL = 2000;  // Maximum throttle signal (in microseconds)
 const int ESC_ARM_SIGNAL = 1500;  // Mid-point signal, often used for arming
+
+PulsePositionInput ReceiverInput(RISING);  // read PPM pulse from rising edge (not PWM)
+
+float receiver[]={0,0,0,0,0,0,0,0};
+int channel=0;
+
+ void getReceiver(void) {
+
+      // read all receiver values
+      channel = ReceiverInput.available();
+      if (channel >0) {
+        for (int c=1;c<=channel;c++) {
+          receiver[c-1]=ReceiverInput.read(c);
+        }
+      }
+
+ }
 
 
 void getGyro(void) {
@@ -45,6 +63,7 @@ void getGyro(void) {
 void setup() {
 
   pinMode(13, OUTPUT);  // on board LED
+  ReceiverInput.begin(14); // pin 14 connected to receiver channel 4
   
   Serial.begin(57600);
 
@@ -79,17 +98,7 @@ void setup() {
 
     // note to self: 0 = 0 micro secs, 4095 = 4000 microsecs .. so need to multiply with 4095/4000 = 1.0214 when setting PWM
 
-    // Send max signal to start calibration
-  analogWrite(1, ESC_MAX_SIGNAL);
-  delay(2000);  // Wait for 2 seconds
-
-  // Send min signal to complete calibration
-  analogWrite(1, ESC_MIN_SIGNAL);
-  delay(2000);  // Wait for 2 seconds
-
-  // Optionally, send a neutral (arming) signal
-  analogWrite(1, ESC_ARM_SIGNAL);
-  delay(1000);  // Wait for 1 second
+    
 
 }
 
@@ -107,20 +116,36 @@ void loop() {
   pitch-=calibratedPitch;
   yaw-=calibratedYaw;
 
-  Serial.print("Roll: ");
+  /*Serial.print("Roll: ");
   Serial.print(roll);
   Serial.print("Pitch: ");
   Serial.print(pitch);
   Serial.print("Yaw: ");
-  Serial.println(yaw);
+  Serial.println(yaw); */
+
+  getReceiver();
+
+  Serial.print("Channels:");
+  Serial.print(channel);
+  Serial.print(" Roll:");
+  Serial.print(receiver[0]);
+  Serial.print(" Pitch:");
+  Serial.print(receiver[1]);
+  Serial.print(" Throttle:");
+  Serial.print(receiver[2]);
+  Serial.print(" Yaw:");
+  Serial.println(receiver[3]);
+
+
+
 
   // hread receiver value here and write inputThrottle*1.024 to motor pwm pin
   //   haven't bought a receiver yet :)
 
-  float throttle = 1000; // assume a value between 0 and 4000
+  
 
   // run motor at throttle speed
-  analogWrite(1, throttle * 1.024) ;
+  //analogWrite(1, throttle * 1.024) ;
 
 
   delay(50);
