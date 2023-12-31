@@ -93,6 +93,7 @@ void setup() {
     calibratedPitch/=2000;
     calibratedYaw/=2000;
 
+  // PWM to motor setup on pin 1
     analogWriteFrequency(1,250);   // pwm for motor on pin 1, 250Hz 
     analogWriteResolution(12);  //  12 bit signal between 0 and 4095  ( default 8 bit would only give us 0 to 255)
 
@@ -125,6 +126,7 @@ void loop() {
 
   getReceiver();
 
+  // receiver values shouod be between 1000 and 2000 microseconds
   Serial.print("Channels:");
   Serial.print(channel);
   Serial.print(" Roll:");
@@ -139,13 +141,24 @@ void loop() {
 
 
 
-  // hread receiver value here and write inputThrottle*1.024 to motor pwm pin
-  //   haven't bought a receiver yet :)
+  float throttle = receiver[2] * 1.024;
 
   
 
-  // run motor at throttle speed
-  //analogWrite(1, throttle * 1.024) ;
+  
+
+  // motor1: counterclockwise right front
+  // motor2: clockwise right rear
+  // motor3: counterclockwise left rear
+  // motor4: clockwise left front
+  
+  float motor1 = throttle - roll - pitch - yaw;
+ /* float motor2 = throttle - roll + pitch + yaw;
+  float motor3 = throttle + roll + pitch - yaw;
+  float motor4 = throttle + roll - pitch + yaw; */
+
+// run motor1 
+  analogWrite(1, motor1) ;
 
 
   delay(50);
